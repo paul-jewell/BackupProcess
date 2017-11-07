@@ -1,8 +1,0 @@
-#!/bin/sh
-
-echo "### RSNAPSHOT WEEKLY ###"
-mount /boot && mount /mnt/backup && rsnapshot -c /etc/rsnapshot.d/weekly.conf weekly || echo "Backup failure"
-umount /mnt/backup
-umount /boot
-echo
-
