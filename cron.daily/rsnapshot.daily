@@ -1,0 +1,12 @@
+#!/bin/sh
+
+echo "### RSNAPSHOT DAILY ###"
+if [ $(mount | grep -c /mnt/backup) != 1 ]
+then
+	mount /mnt/backup && rsnapshot -c /etc/rsnapshot.d/daily.conf daily || echo "Backup failure"
+	umount /mnt/backup
+else
+	rsnapshot -c /etc/rsnapshot.d/daily.conf daily || echo "Backup failure"
+fi
+echo
+

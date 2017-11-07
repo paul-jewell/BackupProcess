@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "### RSNAPSHOT MONTHLY ###"
+mount /mnt/backup && rsnapshot -c /etc/rsnapshot.d/monthly.conf monthly || echo "Backup failure"
+umount /mnt/backup
+echo
+
