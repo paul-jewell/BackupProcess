@@ -5,10 +5,19 @@ BackupMounted=$(mount | grep -c /mnt/backup)
 
 echo "## RSNAPSHOT PROCESSING"
 
+yell() { echo "$0: $*" >&2; }
+die() { yell "$*"; exit 111; }
+try() { "$@" || die "cannot $*"; }
+
 if [[ $BackupMounted -eq 0 ]]
 then
-	mount /mnt/backup || die "Failed to mount backup" 
-	echo "Backup drive mounted"
+	try mount /mnt/backup
+	#if [ "$?" -ne "0" ]
+	#then
+#		die "ERROR: Unable to mount backup - exiting"
+#	else
+		echo "Backup drive mounted"
+#	fi
 else
 	echo "Backup drive already mounted"
 fi
@@ -25,7 +34,7 @@ if [[ $YesterdayDate -gt $LastDailyDate ]]
 then
 	echo "### RSNAPSHOT DAILY ###"
 	echo "Running daily backup process"
-	rsnapshot -c /etc/rsnapshot.d/daily.conf daily || echo "Backup failure"
+#	rsnapshot -c /etc/rsnapshot.d/daily.conf daily || echo "Backup failure"
 	echo
 else
 	echo "Daily backup < 1 day old - not running again"
@@ -35,7 +44,7 @@ if [[ $LastWeekDate -gt $LastWeeklyDate ]]
 then
 	echo "### RSNAPSHOT WEEKLY ###"
 	echo "Running weekly backup process"
-	rsnapshot -c /etc/rsnapshot.d/weekly.conf weekly || echo "Backup failure"
+#	rsnapshot -c /etc/rsnapshot.d/weekly.conf weekly || echo "Backup failure"
 	echo
 else
 	echo "Weekly backup < 1 week old - not running again"
@@ -45,7 +54,7 @@ if [[ $LastMonthDate -gt $LastMonthlyDate ]]
 then
 	echo "### RSNAPSHOT MONTHLY ###"
 	echo "Running monthly backup process"
-	rsnapshot -c /etc/rsnapshot.d/monthly.conf monthly || echo "Backup failure"
+#	rsnapshot -c /etc/rsnapshot.d/monthly.conf monthly || echo "Backup failure"
 	echo
 else
 	echo "Monthly backup < 1 month old - not running again"
