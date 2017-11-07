@@ -1,0 +1,62 @@
+#!/bin/sh
+
+# Mount the drives, if not already mounted
+BackupMounted=$(mount | grep -c /mnt/backup)
+
+echo "## RSNAPSHOT PROCESSING"
+
+if [[ $BackupMounted -eq 0 ]]
+then
+	mount /mnt/backup || die "Failed to mount backup" 
+	echo "Backup drive mounted"
+else
+	echo "Backup drive already mounted"
+fi
+
+LastDailyDate=$(date -r /mnt/backup/daily.0 +%s)
+YesterdayDate=$(date -d "yesterday" +%s)
+LastWeeklyDate=$(date -r /mnt/backup/weekly.0 +%s)
+LastWeekDate=$(date -d "last week" +%s)
+LastMonthlyDate=$(date -r /mnt/backup/monthly.0 +%s)
+LastMonthDate=$(date -d "last month" +%s)
+
+
+if [[ $YesterdayDate -gt $LastDailyDate ]]
+then
+	echo "### RSNAPSHOT DAILY ###"
+	echo "Running daily backup process"
+	rsnapshot -c /etc/rsnapshot.d/daily.conf daily || echo "Backup failure"
+	echo
+else
+	echo "Daily backup < 1 day old - not running again"
+fi
+
+if [[ $LastWeekDate -gt $LastWeeklyDate ]]
+then
+	echo "### RSNAPSHOT WEEKLY ###"
+	echo "Running weekly backup process"
+	rsnapshot -c /etc/rsnapshot.d/weekly.conf weekly || echo "Backup failure"
+	echo
+else
+	echo "Weekly backup < 1 week old - not running again"
+fi
+
+if [[ $LastMonthDate -gt $LastMonthlyDate ]]
+then
+	echo "### RSNAPSHOT MONTHLY ###"
+	echo "Running monthly backup process"
+	rsnapshot -c /etc/rsnapshot.d/monthly.conf monthly || echo "Backup failure"
+	echo
+else
+	echo "Monthly backup < 1 month old - not running again"
+fi
+
+if [[ !$BackupMounted -eq 1 ]]
+then
+	umount /mnt/backup
+	echo "Backup drive unmounted"
+else
+	echo "Backup drive was already mounted so not unmounted"
+fi
+
+echo "## RSNAPSHOT PROCESS COMPLETED ##"
